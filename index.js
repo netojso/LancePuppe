@@ -41,10 +41,12 @@ require('dotenv').config();
           return [contador1.textContent, contador2.textContent, qtdLances.textContent]
         })
 
+        const numeroContador1 = Number(contadores[0])
+        const numeroContador2 = Number(contadores[1])
         const qtdLance = Number(contadores[2])
 
     
-        while (qtdLance > 0 && contadores[0] === '0' && contadores[1] === '4') {
+        while (qtdLance > 0 && numeroContador1 == 0 && numeroContador2 == 4) {
           console.log('Dei um lance!')
 
           await page.click('div#L_BotaoA_43035 a')
