@@ -1,84 +1,67 @@
 const puppeteer = require('puppeteer');
-// const puppeteer = require('puppeteer');
-// const fs = require('fs');
+require('dotenv').config();
 
-// (async () => {
-//   const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto('https://www.instagram.com/rocketseat_oficial');
+  (async () => {
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    await page.goto('https://www.lance24h.com.br')
 
-// const imgList = await page.evaluate(() => {
+    console.log('Acessei o site do Lance 24h')
 
-//         const nodelist = document.querySelectorAll("article img")
-//         const imgarray = [...nodelist]
-//         const imglist = imgarray.map( ({src}) => ({src}))
-//         return imglist
-//   })
+    await page.waitForSelector('li.Li2')
+    await page.click('li.Li2 a')
+    await page.waitFor(1000)
+    await page.type('input#Log_Email', process.env.USERNAME, {delay:300})
 
-//   console.log(imgList)
+    console.log(`Digitei seu username: ${process.env.USERNAME}`)
 
-//   fs.writeFile('instagram.json', JSON.stringify(imgList,null,2), err => {
-//     if (err) throw new Error('deu ruim')
-//     console.log("Well done")
-//  })
+    await page.waitFor(2000)
+    await page.type('input#Log_Senha', process.env.PASSWORD, {delay:300})
 
-// })();
+    console.log(`Digitei sua senha: ${process.env.PASSWORD}`)
 
-// const puppeteer = require('puppeteer');
-// const screenshot = 'youtube_fm_dreams_video.png'
-// try {
-//   (async () => {
-//     const browser = await puppeteer.launch()
-//     const page = await browser.newPage()
-//     await page.goto('https://youtube.com')
-//     await page.type('input#search', 'Fleetwood Mac Dreams')
-//     await page.click('button#search-icon-legacy')
-//     await page.waitForSelector('ytd-app')
-//     await page.screenshot({ path: 'youtube_fm_dreams_list.png' })
-//     const videos = await page.$$('a#thumbnail')
-//     await videos[5].click()
-//     await page.waitForSelector('.html5-video-container')
-//     await page.waitFor(5000)
-//     await page.screenshot({ path: screenshot })
-//     await browser.close()
-//     console.log('See screenshot: ' + screenshot)
-//   })()
-// } catch (err) {
-//   console.error(err)
-// }
+    await page.waitFor(1000)
+    await page.click('div#FFormLogin_B button')
 
-    try{
-      (async () => {
-        const browser = await puppeteer.launch({headless:false})
-        const page = await browser.newPage()
-        await page.goto('https://www.lance24h.com.br')
-        await page.click('li.Li2 a')
-        await page.waitFor(1000)
-        await page.type('input#Log_Email', 'antonioluciofb', {delay:300})
-        await page.waitFor(1000)
-        await page.type('input#Log_Senha', 'aleatorio22A', {delay:300})
-        await page.waitFor(1000)
-        await page.click('div#FFormLogin_B button')
-        await page.waitFor(2000)
-        await page.goto('https://www.lance24h.com.br/Detalhes.php?Titulo=Pacote-50-Lances&Codigo=43042')
-        await page.waitFor(2000)
-        const timer = await page.evaluate ( async () =>{
-          
-          setInterval(function(){ 
-            
-          const contador = document.getElementById("L_ContDown_1_43042")
-          const contador2 = document.getElementById("L_ContDown_2_43042")
-          console.log(contador.textContent)
-          console.log(contador2.textContent)
+    console.log('Cliquei em entrar')
 
-          // if (contador == 0 && contador2 == 8) {
-          //     await page.click('div#L_BotaoA_43042 a')
-          // } 
-        
-              }, 1000);
-         
+    await page.waitFor(2000)
+    await page.waitForSelector('div.row')
+    await page.waitFor(2000)
+
+    console.log('Estou de olho no lance')
+
+   const timer = setInterval(async () => {
+
+        const contadores = await page.evaluate(() => {
+
+          const contador1 = document.getElementById("L_ContDown_1_43035")
+          const contador2 = document.getElementById("L_ContDown_2_43035")
+          const qtdLances = document.getElementById("F_QtdLancesR")
+          return [contador1.textContent, contador2.textContent, qtdLances.textContent]
         })
-      })()
-    } catch (err) {
-      console.error(err)
-    }
+
+        const qtdLance = Number(contadores[2])
+
+    
+        while (qtdLance > 0 && contadores[0] === '0' && contadores[1] === '4') {
+          console.log('Dei um lance!')
+
+          await page.click('div#L_BotaoA_43035 a')
+
+          return;
+        }
+
+        if (qtdLance == 0) {
+            clearInterval(timer)
+            console.log('Opa, você chegou no limite de lances. Vamos fechar o navegador')
+            await browser.close()
+            process.on('exit', () => {
+              console.log('Fechando terminal.')
+            })
+        } else {
+          console.log('Ainda não chegou em 04 segundos para eu dar um lance.')
+        }
+        
+   }, 1000)
+  })()
